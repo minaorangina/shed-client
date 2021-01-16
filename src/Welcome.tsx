@@ -1,8 +1,13 @@
 import './Welcome.css'
 import { Formik, Field, Form } from 'formik';
 
+interface WelcomeProps {
+  updateGameData: Function,
+  updatePlayers: Function,
+}
 
-function Welcome({ updateGameData, updatePlayers }) {
+
+function Welcome({ updateGameData, updatePlayers }: { updateGameData: Function, updatePlayers: Function }) {
   return (
     <>
       <h1>Shed!</h1>
@@ -18,7 +23,7 @@ export default Welcome;
 
 
 
-function NewGame(props) {
+function NewGame(props: WelcomeProps) {
   return (
     <div className="form-wrapper">
       <h3>Create a new game</h3>
@@ -40,7 +45,7 @@ function NewGame(props) {
   )
 }
 
-function JoinGame(props) {
+function JoinGame(props: WelcomeProps) {
   return (
     <div className="form-wrapper">
       <h3>Join a game</h3>
@@ -66,7 +71,7 @@ function JoinGame(props) {
   )
 }
 
-function handleNewGameSubmit(values, updateGameData, updatePlayers) {
+function handleNewGameSubmit(values: any, updateGameData: Function, updatePlayers: Function) {
   const req = new Request("http://localhost:8000/new", {
       method: "POST",
       headers: new Headers(),
@@ -89,7 +94,7 @@ function handleNewGameSubmit(values, updateGameData, updatePlayers) {
       .catch(console.error)
 }
 
-function handleJoinGameSubmit(values, updateGameData, updatePlayers) {
+function handleJoinGameSubmit(values: any, updateGameData: Function, updatePlayers: Function) {
    const req = new Request("http://localhost:8000/join", {
       method: "POST",
       headers: new Headers(),
@@ -114,8 +119,8 @@ function handleJoinGameSubmit(values, updateGameData, updatePlayers) {
       .catch(console.error)
 }
 
-function handleValidation(values) {
-  const errors = {}
+function handleValidation(values: any) {
+  const errors: any = {}
 
   if (values.newName && values.newName === '') {
     errors.name = "Name is required"

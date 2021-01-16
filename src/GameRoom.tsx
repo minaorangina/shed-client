@@ -1,7 +1,31 @@
 import { Component } from 'react'
 
-class GameRoom extends Component {
-  constructor(props) {
+interface GameRoomProps {
+  gameID: string,
+  isAdmin: boolean,
+  name: string,
+  players: string[],
+  started: boolean,
+  playerID: string,
+  initWS: Function,
+  startGame: Function,
+  updatePlayers: Function,
+}
+
+interface WaitingRoomProps {
+  gameID: string,
+  isAdmin: boolean,
+  name: string,
+  players: string[],
+  startGame: Function,
+}
+
+interface StartButtonProps {
+  startGame: Function,
+}
+
+class GameRoom extends Component<GameRoomProps> {
+  constructor(props: GameRoomProps) {
     super(props)
   }
 
@@ -34,11 +58,11 @@ class GameRoom extends Component {
 export default GameRoom
 
 
-function GameTable(props) {
+function GameTable(props: any) {
   return <h1>Game table!</h1>
 }
 
-function WaitingRoom(props) {
+function WaitingRoom(props: WaitingRoomProps) {
   return (
     <>
       <h1>{`${props.name}, waiting for others to join`}</h1>
@@ -59,11 +83,11 @@ function WaitingRoom(props) {
   )
 }
 
-function StartButton(props) {
+function StartButton(props: StartButtonProps) {
   return (
     <button 
       className="start-button"
-      onClick={props.startGame}
+      onClick={e => props.startGame(e)}
     >
       Start game
     </button>

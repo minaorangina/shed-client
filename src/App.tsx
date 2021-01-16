@@ -3,28 +3,36 @@ import './App.css';
 import Welcome from './Welcome';
 import GameRoom from './GameRoom';
 
-class App extends Component {
-  constructor(props) {
-    super(props)
+type AppState = {
+  game_id: string,
+  player_id: string,
+  name: string,
+  is_admin: boolean,
+  ws: WebSocket|null,
+  started: boolean,
+  players: string[],
+}
 
-    this.state = {
-      game_id: undefined,
-      player_id: undefined,
-      name: undefined,
-      is_admin: undefined,
-      ws: undefined,
-      started: false,
-      players: [],
-    }
+
+
+class App extends Component {
+  state: AppState  = {
+    game_id: "",
+    player_id: "",
+    name: "",
+    is_admin: false,
+    ws: null,
+    started: false,
+    players: [],
   }
 
-  updatePlayers = (...newPlayers) => {
+  updatePlayers = (...newPlayers: string[]) => {
     this.setState({
       players: [...this.state.players, ...newPlayers]
     })
   }
 
-  updateGameData = (updates) => {
+  updateGameData = (updates: any) => {
     delete updates.players
     this.setState({
       ...updates,
@@ -47,7 +55,7 @@ class App extends Component {
 
         ws.onopen = console.info
 
-        ws.onerror = e => {
+        ws.onerror = (e: any) => {
           throw new Error(`websocket error: ${e.error}`)
         };
 
@@ -58,13 +66,13 @@ class App extends Component {
   }
 
   startGame = () => {
-    this.state.ws.send(JSON.stringify({
+    this.state.ws && this.state.ws.send(JSON.stringify({
       player_id: this.state.player_id,
       command: 3, // Start game
     }))
   }
 
-  handleMessage = (raw) => {
+  handleMessage = (raw: MessageEvent) => {
     console.info("incoming", raw)
     const data = JSON.parse(raw.data)
 
