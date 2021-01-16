@@ -60,7 +60,7 @@ class App extends Component {
   startGame = () => {
     this.state.ws.send(JSON.stringify({
       player_id: this.state.player_id,
-      command: "Start"
+      command: 3, // Start game
     }))
   }
 
@@ -72,7 +72,14 @@ class App extends Component {
       case 1: // new joiner
         console.log("NEW JOINER",data)
         this.updatePlayers(data.joiner)
+        break;
 
+      case 4: // has started
+        console.log("GAME HAS STARTED!")
+        this.setState({
+          started: true,
+        })
+        break;
     }
   }
 

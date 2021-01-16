@@ -106,7 +106,6 @@ function handleJoinGameSubmit(values, updateGameData, updatePlayers) {
         return res.json()
       })
       .then(data => {
-        console.log("joined game", data.players)
         const players = [...data.players]
         delete data.players
         updateGameData(data)
