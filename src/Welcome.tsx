@@ -90,6 +90,7 @@ function handleNewGameSubmit(values: any, updateGameData: Function, updatePlayer
         console.log(data)
         delete data.players
         updateGameData(data)
+        updatePlayers(data.name)
       })
       .catch(console.error)
 }
@@ -111,7 +112,7 @@ function handleJoinGameSubmit(values: any, updateGameData: Function, updatePlaye
         return res.json()
       })
       .then(data => {
-        const players = [...data.players]
+        const players = [...data.players, data.name]
         delete data.players
         updateGameData(data)
         updatePlayers(...players)
