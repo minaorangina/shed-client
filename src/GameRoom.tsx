@@ -1,28 +1,6 @@
 import { Component } from 'react'
-
-interface GameRoomProps {
-  gameID: string,
-  isAdmin: boolean,
-  name: string,
-  players: string[],
-  started: boolean,
-  playerID: string,
-  initWS: Function,
-  startGame: Function,
-  updatePlayers: Function,
-}
-
-interface WaitingRoomProps {
-  gameID: string,
-  isAdmin: boolean,
-  name: string,
-  players: string[],
-  startGame: Function,
-}
-
-interface StartButtonProps {
-  startGame: Function,
-}
+import GameTable from './GameTable'
+import { GameState } from './types'
 
 class GameRoom extends Component<GameRoomProps> {
   constructor(props: GameRoomProps) {
@@ -37,7 +15,7 @@ class GameRoom extends Component<GameRoomProps> {
     return (
       <>
       {
-        this.props.started && <GameTable />
+        this.props.started && <GameTable gameState={this.props.gameState}/>
       }
       {
         !this.props.started &&  
@@ -58,9 +36,6 @@ class GameRoom extends Component<GameRoomProps> {
 export default GameRoom
 
 
-function GameTable(props: any) {
-  return <h1>Game table!</h1>
-}
 
 function WaitingRoom(props: WaitingRoomProps) {
   return (
@@ -92,4 +67,29 @@ function StartButton(props: StartButtonProps) {
       Start game
     </button>
   )
+}
+
+interface GameRoomProps {
+  gameID: string,
+  isAdmin: boolean,
+  name: string,
+  players: string[],
+  started: boolean,
+  playerID: string,
+  gameState: GameState,
+  initWS: Function,
+  startGame: Function,
+  updatePlayers: Function,
+}
+
+interface WaitingRoomProps {
+  gameID: string,
+  isAdmin: boolean,
+  name: string,
+  players: string[],
+  startGame: Function,
+}
+
+interface StartButtonProps {
+  startGame: Function,
 }

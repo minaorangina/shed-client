@@ -2,6 +2,7 @@ import { Component } from 'react'
 import './App.css';
 import Welcome from './Welcome';
 import GameRoom from './GameRoom';
+import { GameState, Message } from './types';
 
 type AppState = {
   game_id: string,
@@ -11,9 +12,8 @@ type AppState = {
   ws: WebSocket|null,
   started: boolean,
   players: string[],
+  gameState: GameState,
 }
-
-
 
 class App extends Component {
   state: AppState  = {
@@ -24,6 +24,7 @@ class App extends Component {
     ws: null,
     started: false,
     players: [],
+    gameState: {} as GameState,
   }
 
   updatePlayers = (...newPlayers: string[]) => {
@@ -72,14 +73,33 @@ class App extends Component {
     }))
   }
 
+  handleReorg = (data: Message) => {
+    this.setState({
+      gameState: {
+        command: data.command,
+        shouldRespond: data.should_respond,
+        currentTurn: data.current_turn,
+        hand: data.hand,
+        seen: data.seen,
+        opponents: data.opponents,
+      },
+    })
+  }
+
   handleMessage = (raw: MessageEvent) => {
-    console.info("incoming", raw)
-    const data = JSON.parse(raw.data)
+    console.info("incoming")
+    const data: Message = JSON.parse(raw.data)
+    console.log(`command ${data.command}`)
 
     switch (data.command) {
       case 1: // new joiner
         console.log("NEW JOINER",data)
-        this.updatePlayers(data.joiner)
+        this.updatePlayers(data!.joiner || "")
+        break;
+
+      case 2: // reorg
+        console.log("REORG", data)
+        this.handleReorg(data)
         break;
 
       case 4: // has started
@@ -88,6 +108,9 @@ class App extends Component {
           started: true,
         })
         break;
+
+      default:
+        console.log("unknown command", data)
     }
   }
 
@@ -103,6 +126,7 @@ class App extends Component {
               players={this.state.players}
               playerID={this.state.player_id}
               started={this.state.started}
+              gameState={this.state.gameState}
 
               initWS={this.initWS}
               startGame={this.startGame}
