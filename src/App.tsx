@@ -2,7 +2,7 @@ import { Component } from 'react'
 import './App.css';
 import Welcome from './Welcome';
 import GameRoom from './GameRoom';
-import { GameState, Message } from './types';
+import { GameState, Message, Card } from './types';
 
 type AppState = {
   game_id: string,

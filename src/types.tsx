@@ -47,6 +47,7 @@ export enum Suit {
 export interface Card {
   rank: Rank,
   suit: Suit,
+  canonicalName: string,
 }
 
 export interface Opponent {
