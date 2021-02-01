@@ -1,0 +1,14 @@
+.selected {
+  /* border: 5px solid #12b698; */
+  filter: drop-shadow(0 0 0.75rem #12b698);
+  border-radius: 5px;
+}
+
+.card {
+  padding: 10px;
+  margin: 5px;
+}
+
+.cardContainer {
+  padding: 10px;
+}

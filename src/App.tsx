@@ -79,6 +79,7 @@ class App extends Component {
         command: data.command,
         shouldRespond: data.should_respond,
         currentTurn: data.current_turn,
+        isTurn: data.current_turn === this.state.player_id,
         hand: data.hand,
         seen: data.seen,
         opponents: data.opponents,
