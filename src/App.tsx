@@ -2,7 +2,7 @@ import { Component } from 'react'
 import './App.css';
 import Welcome from './Welcome';
 import GameRoom from './GameRoom';
-import { GameState, Message, Card } from './types';
+import { GameState, Message, Protocol } from './types';
 
 type AppState = {
   game_id: string,
@@ -79,7 +79,7 @@ class App extends Component {
         command: data.command,
         shouldRespond: data.should_respond,
         currentTurn: data.current_turn,
-        isTurn: data.current_turn === this.state.player_id,
+        isTurn: data.command === Protocol.Reorg || data.current_turn === this.state.player_id,
         hand: data.hand,
         seen: data.seen,
         opponents: data.opponents,

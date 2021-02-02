@@ -6,6 +6,7 @@ interface GameTableState {
   selectableHand: number[],
   selectableSeen: number[],
   selected: Card[],
+  max: number,
 }
 
 interface GameTableProps {
@@ -21,6 +22,7 @@ class GameTable extends Component<GameTableProps>{
     selectableHand: [],
     selectableSeen: [],
     selected: [],
+    max: 0,
   }
 
   static getDerivedStateFromProps(props: GameTableProps, state: GameTableState) {
@@ -28,6 +30,8 @@ class GameTable extends Component<GameTableProps>{
       return {
         selectableHand: [],
         selectableSeen: [],
+        selected: [],
+        max: 0,
       }
     }
 
@@ -36,6 +40,7 @@ class GameTable extends Component<GameTableProps>{
         return {
           selectableHand: [0,1,2],
           selectableSeen: [0,1,2],
+          max: 3,
         }
 
       default:
@@ -45,11 +50,18 @@ class GameTable extends Component<GameTableProps>{
 
   handleSelection = (type: string, selection: Card) => {
     console.log("clicked", selection)
+    let newSelected;
     const idx = this.state.selected.indexOf(selection)
 
-    let newSelected = (idx === -1) ?
-      [...this.state.selected, selection].sort() :
-      this.state.selected.filter(v => v !== selection);
+    if (idx === -1) {
+      const maxCardsSelected = this.state.selected.length === this.state.max;
+      if (maxCardsSelected) {
+        return;
+      }
+      newSelected = [...this.state.selected, selection].sort()
+    } else {
+      newSelected = this.state.selected.filter(v => v !== selection);
+    }
 
     console.log("new", newSelected)
 
