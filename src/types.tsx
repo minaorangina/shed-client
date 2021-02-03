@@ -65,12 +65,28 @@ export interface Message {
   hand: Card[],
   seen: Card[],
   pile: Card[],
-  joiner?: string,
+  opponents: Opponent[]
   current_turn?: string,
   moves?: number[],
-  opponents: Opponent[]
   finished_players?: string[]
   error?: string,
+  joiner?: string,
+}
+
+export interface PendingGame {
+  player_id: string,
+  name: string,
+  is_admin: boolean,
+}
+
+export interface PendingGameJoined extends PendingGame {
+  players: string[],
+}
+
+export interface Reply {
+  player_id: string,
+  command: Protocol,
+  decision: number[],
 }
 
 export interface GameState {

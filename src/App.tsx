@@ -2,7 +2,7 @@ import { Component } from 'react'
 import './App.css';
 import Welcome from './Welcome';
 import GameRoom from './GameRoom';
-import { GameState, Message, Protocol } from './types';
+import { GameState, Message, Protocol, Reply } from './types';
 
 type AppState = {
   game_id: string,
@@ -27,19 +27,29 @@ class App extends Component {
     gameState: {} as GameState,
   }
 
-  updatePlayers = (...newPlayers: string[]) => {
+  updateAppState = (updates: any) => {
     this.setState({
-      players: [...this.state.players, ...newPlayers]
+      ...updates,
+    }, () => {
+      console.info("INITIAL DATA", this.state)
     })
   }
 
-  updateGameData = (updates: any) => {
-    delete updates.players
+  updateGameState = (data: Message) => {
     this.setState({
-      ...updates,
-      players: this.state.players,
-    }, () => {
-      console.info("INITIAL DATA", this.state)
+      gameState: {
+        command: data.command,
+        shouldRespond: data.should_respond,
+        currentTurn: data.current_turn,
+        isTurn: data.command === Protocol.Reorg || data.current_turn === this.state.player_id,
+        hand: data.hand,
+        seen: data.seen,
+        pile: data.pile,
+        opponents: data.opponents,
+        moves: data.moves,
+        finished_players: data.finished_players,
+        error: data.error,
+      },
     })
   }
 
@@ -73,18 +83,10 @@ class App extends Component {
     }))
   }
 
-  handleReorg = (data: Message) => {
-    this.setState({
-      gameState: {
-        command: data.command,
-        shouldRespond: data.should_respond,
-        currentTurn: data.current_turn,
-        isTurn: data.command === Protocol.Reorg || data.current_turn === this.state.player_id,
-        hand: data.hand,
-        seen: data.seen,
-        opponents: data.opponents,
-      },
-    })
+
+  sendReply = (reply: Reply) => {
+    reply.player_id = this.state.player_id;
+    this.state.ws && this.state.ws.send(JSON.stringify(reply))
   }
 
   handleMessage = (raw: MessageEvent) => {
@@ -93,21 +95,25 @@ class App extends Component {
     console.log(`command ${data.command}`)
 
     switch (data.command) {
-      case 1: // new joiner
+      case Protocol.NewJoiner:
         console.log("NEW JOINER",data)
-        this.updatePlayers(data!.joiner || "")
+        this.updateAppState({ players: [...this.state.players, data.joiner] })
         break;
 
-      case 2: // reorg
+      case Protocol.Reorg:
         console.log("REORG", data)
-        this.handleReorg(data)
+        this.updateGameState(data)
         break;
 
-      case 4: // has started
+      case Protocol.HasStarted: // has started
         console.log("GAME HAS STARTED!")
         this.setState({
           started: true,
         })
+        break;
+
+      case Protocol.Turn:
+        this.updateGameState(data)
         break;
 
       default:
@@ -131,12 +137,12 @@ class App extends Component {
 
               initWS={this.initWS}
               startGame={this.startGame}
-              updatePlayers={this.updatePlayers}
+              sendReply={this.sendReply}
             />
         }
         {
           !this.state.game_id && 
-            <Welcome updateGameData={this.updateGameData} updatePlayers={this.updatePlayers} />
+            <Welcome updateAppState={this.updateAppState} />
         }
       </div>
     );

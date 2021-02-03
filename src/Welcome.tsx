@@ -1,19 +1,19 @@
 import './Welcome.css'
 import { Formik, Field, Form } from 'formik';
+import { PendingGame, PendingGameJoined } from './types'
 
 interface WelcomeProps {
-  updateGameData: Function,
-  updatePlayers: Function,
+  updateAppState: Function,
 }
 
 
-function Welcome({ updateGameData, updatePlayers }: { updateGameData: Function, updatePlayers: Function }) {
+function Welcome({ updateAppState } : { updateAppState: Function }) {
   return (
     <>
       <h1>Shed!</h1>
       <div className="welcome">
-        <NewGame updateGameData={updateGameData} updatePlayers={updatePlayers} />
-        <JoinGame updateGameData={updateGameData} updatePlayers={updatePlayers} />
+        <NewGame updateAppState={updateAppState} />
+        <JoinGame updateAppState={updateAppState} />
       </div>
     </>
   )
@@ -32,7 +32,7 @@ function NewGame(props: WelcomeProps) {
         initialValues={{
           newName:'',
         }}
-        onSubmit={values => handleNewGameSubmit(values, props.updateGameData, props.updatePlayers)}
+        onSubmit={values => handleNewGameSubmit(values, props.updateAppState)}
         >
         <Form className="form">
           <label htmlFor="new-name">Your name</label>
@@ -55,7 +55,7 @@ function JoinGame(props: WelcomeProps) {
         joinName:'',
         joinCode: '',
       }}
-      onSubmit={values => handleJoinGameSubmit(values, props.updateGameData, props.updatePlayers)}
+      onSubmit={values => handleJoinGameSubmit(values, props.updateAppState)}
       >
         <Form className="form">
           <label htmlFor="join-name">Your name</label>
@@ -71,7 +71,7 @@ function JoinGame(props: WelcomeProps) {
   )
 }
 
-function handleNewGameSubmit(values: any, updateGameData: Function, updatePlayers: Function) {
+function handleNewGameSubmit(values: any, updateAppState: Function) {
   const req = new Request("http://localhost:8000/new", {
       method: "POST",
       headers: new Headers(),
@@ -86,16 +86,14 @@ function handleNewGameSubmit(values: any, updateGameData: Function, updatePlayer
         }
         return res.json()
       })
-      .then((data) => {
-        console.log(data)
-        delete data.players
-        updateGameData(data)
-        updatePlayers(data.name)
+      .then((data: PendingGame) => {
+        console.log("pending game", data)
+        updateAppState({...data, players: [data.name]})
       })
       .catch(console.error)
 }
 
-function handleJoinGameSubmit(values: any, updateGameData: Function, updatePlayers: Function) {
+function handleJoinGameSubmit(values: any, updateAppState: Function) {
    const req = new Request("http://localhost:8000/join", {
       method: "POST",
       headers: new Headers(),
@@ -111,11 +109,10 @@ function handleJoinGameSubmit(values: any, updateGameData: Function, updatePlaye
         }
         return res.json()
       })
-      .then(data => {
+      .then((data: PendingGameJoined) => {
         const players = [...data.players, data.name]
-        delete data.players
-        updateGameData(data)
-        updatePlayers(...players)
+        console.log("playersss", players)
+        updateAppState({...data, players})
       })
       .catch(console.error)
 }
