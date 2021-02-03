@@ -1,6 +1,6 @@
 import { Component } from 'react'
 import GameTable from './GameTable'
-import { GameState } from './types'
+import { GameState, PlayerInfo } from './types'
 
 class GameRoom extends Component<GameRoomProps> {
   constructor(props: GameRoomProps) {
@@ -51,7 +51,7 @@ function WaitingRoom(props: WaitingRoomProps) {
       <h2>Players</h2>
       <ul>
       {
-        props.players.map((name) => <li key={name}>{name}</li>)
+        props.players.map((info: PlayerInfo) => <li key={info.name}>{info.name}</li>)
       }
       </ul>
     </>
@@ -73,7 +73,7 @@ interface GameRoomProps {
   gameID: string,
   isAdmin: boolean,
   name: string,
-  players: string[],
+  players: PlayerInfo[],
   started: boolean,
   playerID: string,
   gameState: GameState,
@@ -86,7 +86,7 @@ interface WaitingRoomProps {
   gameID: string,
   isAdmin: boolean,
   name: string,
-  players: string[],
+  players: PlayerInfo[],
   startGame: Function,
 }
 

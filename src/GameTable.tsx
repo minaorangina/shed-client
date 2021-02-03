@@ -106,9 +106,11 @@ class GameTable extends Component<GameTableProps>{
     const { gameState } = this.props
     return (
       <>
-      <h1>Game table!</h1>
         {
           !gameState && <p>Waiting for server...</p>
+        }
+        {
+          gameState.message && <h2>{gameState.message}</h2>
         }
         {
           gameState.isTurn &&

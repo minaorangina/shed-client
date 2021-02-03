@@ -56,6 +56,23 @@ export interface Opponent {
   seen: Card[],
 }
 
+export interface PendingGame {
+  player_id: string,
+  name: string,
+  player_info: PlayerInfo,
+  is_admin: boolean,
+}
+
+
+export interface PendingGameJoined extends PendingGame {
+  players: PlayerInfo[],
+}
+
+export interface PlayerInfo {
+  playerID: string,
+  name: string,
+}
+
 export interface Message {
   command: Protocol,
   player_id: string,
@@ -73,15 +90,7 @@ export interface Message {
   joiner?: string,
 }
 
-export interface PendingGame {
-  player_id: string,
-  name: string,
-  is_admin: boolean,
-}
 
-export interface PendingGameJoined extends PendingGame {
-  players: string[],
-}
 
 export interface Reply {
   player_id: string,
@@ -99,6 +108,7 @@ export interface GameState {
   isTurn: boolean,
   moves: number[],
   opponents: Opponent[]
+  message: string,
 }
 
 export enum CardGroup {

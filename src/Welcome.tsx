@@ -1,6 +1,6 @@
 import './Welcome.css'
 import { Formik, Field, Form } from 'formik';
-import { PendingGame, PendingGameJoined } from './types'
+import { PendingGame, PendingGameJoined, PlayerInfo } from './types'
 
 interface WelcomeProps {
   updateAppState: Function,
@@ -88,7 +88,7 @@ function handleNewGameSubmit(values: any, updateAppState: Function) {
       })
       .then((data: PendingGame) => {
         console.log("pending game", data)
-        updateAppState({...data, players: [data.name]})
+        updateAppState({...data, players: [data.player_info]})
       })
       .catch(console.error)
 }
@@ -110,7 +110,7 @@ function handleJoinGameSubmit(values: any, updateAppState: Function) {
         return res.json()
       })
       .then((data: PendingGameJoined) => {
-        const players = [...data.players, data.name]
+        const players: PlayerInfo[] = [...data.players, data.player_info]
         console.log("playersss", players)
         updateAppState({...data, players})
       })

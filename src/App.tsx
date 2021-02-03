@@ -2,7 +2,7 @@ import { Component } from 'react'
 import './App.css';
 import Welcome from './Welcome';
 import GameRoom from './GameRoom';
-import { GameState, Message, Protocol, Reply } from './types';
+import { GameState, Message, Protocol, Reply, PlayerInfo } from './types';
 
 type AppState = {
   game_id: string,
@@ -11,7 +11,7 @@ type AppState = {
   is_admin: boolean,
   ws: WebSocket|null,
   started: boolean,
-  players: string[],
+  players: PlayerInfo[],
   gameState: GameState,
 }
 
@@ -49,6 +49,7 @@ class App extends Component {
         moves: data.moves,
         finished_players: data.finished_players,
         error: data.error,
+        message: data.message,
       },
     })
   }
@@ -79,7 +80,7 @@ class App extends Component {
   startGame = () => {
     this.state.ws && this.state.ws.send(JSON.stringify({
       player_id: this.state.player_id,
-      command: 3, // Start game
+      command: Protocol.Start,
     }))
   }
 
@@ -105,7 +106,7 @@ class App extends Component {
         this.updateGameState(data)
         break;
 
-      case Protocol.HasStarted: // has started
+      case Protocol.HasStarted:
         console.log("GAME HAS STARTED!")
         this.setState({
           started: true,
@@ -113,6 +114,8 @@ class App extends Component {
         break;
 
       case Protocol.Turn:
+      case Protocol.PlayHand:
+        console.log("TURN", data)
         this.updateGameState(data)
         break;
 
