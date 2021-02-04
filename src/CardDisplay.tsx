@@ -8,15 +8,12 @@ function CardDisplay(props: CardDisplayProps) {
     {
       props.cards && props.cards.map((c: Card, i) => {
         const isSelected = props.selected.includes(c);
-
-        const canonicalName = `${c.rank} of ${c.suit}`
+        const classes = `${isSelected ? `${styles.selected}` : ''}`
         return (
-          <img 
-            key={canonicalName} 
-            src={deck[c.suit][c.rank]} 
-            alt={canonicalName}
-            onClick={() => props.toggleSelection(props.group, c)}
-            className={`${styles.card} ${isSelected ? `${styles.selected}` : ''}`}
+          <SingleCard
+            card={c}
+            handleClick={() => props.toggleSelection(props.group, c)}
+            classes={classes}
           />
         )
       })
@@ -25,8 +22,26 @@ function CardDisplay(props: CardDisplayProps) {
   )
 }
 
+export function SingleCard(props: SingleCardProps) {
+  const { card, classes = "", handleClick } = props
+  const fn = handleClick ? handleClick : (()=>{})
+  return (
+     <img
+        src={deck[card.suit][card.rank]}
+        alt={card.canonicalName}
+        onClick={() => fn()}
+        className={`${styles.card} ${classes}`}
+      />
+  )
+}
+
 export default CardDisplay
 
+interface SingleCardProps {
+  card: Card,
+  classes?: string,
+  handleClick?: Function,
+}
 interface CardDisplayProps {
   cards: Card[],
   group: CardGroup,

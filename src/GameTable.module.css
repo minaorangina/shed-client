@@ -1,0 +1,32 @@
+.personalContainer {
+  border: 1px solid red;
+  flex: 3;
+}
+
+.sharedContainer {
+  border: 1px solid blue;
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+}
+
+.opponentsContainer {
+  border: 1px solid green;
+  flex: 1;
+}
+
+.opponent {
+  border: 1px solid yellow;
+  width: 100%;
+  flex: 1;
+}
+
+.opponentCard {
+  width: 4em;
+}
+
+.container {
+  border: 10px solid orange;
+  display: flex;
+  flex-direction: row;
+}

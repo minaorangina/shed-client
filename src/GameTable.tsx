@@ -1,6 +1,9 @@
-import { Component } from 'react';
-import CardDisplay from './CardDisplay'
-import { GameState, Protocol, CardGroup, Card, Reply } from './types'
+import { Component } from 'react'
+import CardDisplay, { SingleCard } from './CardDisplay'
+import cardStyles from './CardDisplay.module.css'
+import Pile from './Pile'
+import styles from './GameTable.module.css'
+import { GameState, Protocol, CardGroup, Card, Reply, Opponent } from './types'
 
 const REORG_SEEN_OFFSET = 3
 
@@ -31,7 +34,8 @@ class GameTable extends Component<GameTableProps>{
   }
 
   static getDerivedStateFromProps(props: GameTableProps, state: GameTableState) {
-    if (!props.gameState.isTurn) {
+    const { gameState } = props;
+    if (!gameState.isTurn) {
       return {
         selectableHand: [],
         selectableSeen: [],
@@ -40,13 +44,21 @@ class GameTable extends Component<GameTableProps>{
       }
     }
 
-    switch(props.gameState.command) {
+    switch(gameState.command) {
       case Protocol.Reorg:
         return {
           selectableHand: [0,1,2],
           selectableSeen: [0,1,2],
           min: 3,
           max: 3,
+        }
+
+      case Protocol.PlayHand:
+        return {
+          selectableHand: gameState.moves,
+          selectableSeen: [],
+          min: 1,
+          max: gameState.moves.length,
         }
 
       default:
@@ -112,44 +124,80 @@ class GameTable extends Component<GameTableProps>{
         {
           gameState.message && <h2>{gameState.message}</h2>
         }
-        {
-          gameState.isTurn &&
-          gameState.command !== Protocol.SkipTurn &&
-           <button 
-            disabled={this.state.selected.length < this.state.min} 
-            onClick={this.handleSubmit}>
-              Confirm
-          </button>
-        }
-        {
-          gameState.hand && (
-            <>
-              <h2>Hand cards</h2>
-              <CardDisplay
-                cards={gameState.hand}
-                selectable={this.state.selectableHand}
-                selected={this.state.selected}
-                toggleSelection={this.toggleSelection}
-                group={CardGroup.hand} />
-            </>
-          )
-        }
-        {
-          gameState.seen && (
-            <>
-              <h2>Visible cards</h2>
-              <CardDisplay
-                cards={gameState.seen}
-                selectable={this.state.selectableSeen}
-                selected={this.state.selected}
-                toggleSelection={this.toggleSelection}
-                group={CardGroup.seen} />
-            </>
-          )
-        }
-        {
-          <h2>Hidden cards</h2>
-        }
+        <div className={styles.container}>
+          <div className={styles.personalContainer}>
+            {
+              gameState.isTurn &&
+              gameState.command !== Protocol.SkipTurn &&
+              <button
+                disabled={this.state.selected.length < this.state.min}
+                onClick={this.handleSubmit}>
+                  Confirm
+              </button>
+            }
+            {
+              gameState.hand && (
+                <>
+                  <h2>Hand cards</h2>
+                  <CardDisplay
+                    cards={gameState.hand}
+                    selectable={this.state.selectableHand}
+                    selected={this.state.selected}
+                    toggleSelection={this.toggleSelection}
+                    group={CardGroup.hand}
+                  />
+                </>
+              )
+            }
+            {
+              gameState.seen && (
+                <>
+                  <h2>Visible cards</h2>
+                  <CardDisplay
+                    cards={gameState.seen}
+                    selectable={this.state.selectableSeen}
+                    selected={this.state.selected}
+                    toggleSelection={this.toggleSelection}
+                    group={CardGroup.seen}
+                  />
+                </>
+              )
+            }
+            {
+              <h2>Hidden cards</h2>
+            }
+            </div>
+            <div className={styles.sharedContainer}>
+            {
+              gameState.pile && <Pile cards={gameState.pile} />
+            }
+            {
+              gameState.opponents && (
+                <div className={styles.opponentsContainer}>
+                  <h4>Opponents</h4>
+                  {
+                    gameState.opponents.map((o: Opponent) => {
+                      return (
+                        <div className={styles.opponent}>
+                          <p>{`${o.player_id}'s visible cards`}</p>
+                          {
+                            o.seen.map((c: Card) => (
+                              <SingleCard
+                                key={c.canonicalName}
+                                card={c} handleClick={()=>{}}
+                                classes={styles.opponentCard}
+                              />
+                            ))
+                          }
+                        </div>
+                      )
+                    })
+                  }
+                </div>
+              )
+            }
+            </div>
+        </div>
      </>
     )
   }
