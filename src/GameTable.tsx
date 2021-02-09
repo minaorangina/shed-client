@@ -141,7 +141,7 @@ class GameTable extends Component<GameTableProps>{
 
       // show the new selection
       console.log("hand", hand, "seen", seen)
-      // this.props.partiallyUpdateGameState({ hand, seen })
+      this.props.partiallyUpdateGameState({ hand, seen })
       this.setState({ selected: [], reorgSet: {} })
 
       const reply: Reply = {

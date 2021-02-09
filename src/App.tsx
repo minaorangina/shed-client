@@ -54,7 +54,7 @@ class App extends Component {
         isTurn,
         hand: data.hand,
         seen: data.seen,
-        pile: data.pile,
+        pile: data.pile.reverse(),
         opponents: data.opponents,
         moves: data.moves,
         finishedPlayers: data.finishedPlayers,

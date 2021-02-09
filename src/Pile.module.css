@@ -2,3 +2,24 @@
   border: 1px solid pink;
   flex: 1;
 }
+
+.wrapper {
+  display: flex;
+  flex-direction: row;
+  margin: 2em;
+}
+
+.topCard {
+  width: 6em;
+  flex: 2;
+  margin: 1em;
+}
+
+.topCardText {
+  font-weight: bold;
+}
+
+.list {
+  flex: 1;
+  margin: 1em;
+}
