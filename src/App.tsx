@@ -5,10 +5,10 @@ import GameRoom from './GameRoom';
 import { GameState, Message, Protocol, Reply, PlayerInfo } from './types';
 
 type AppState = {
-  game_id: string,
-  player_id: string,
+  gameID: string,
+  playerID: string,
   name: string,
-  is_admin: boolean,
+  isAdmin: boolean,
   ws: WebSocket|null,
   started: boolean,
   players: PlayerInfo[],
@@ -17,10 +17,10 @@ type AppState = {
 
 class App extends Component {
   state: AppState  = {
-    game_id: "",
-    player_id: "",
+    gameID: "",
+    playerID: "",
     name: "",
-    is_admin: false,
+    isAdmin: false,
     ws: null,
     started: false,
     players: [],
@@ -35,19 +35,29 @@ class App extends Component {
     })
   }
 
+  partiallyUpdateGameState = (updates: any) => {
+    this.setState({
+      gameState: {...this.state.gameState, ...updates},
+    })
+  }
+
   updateGameState = (data: Message) => {
+    // console.log("update", data)
+    const isTurn = data.command === Protocol.Reorg ||
+      (data.currentTurn && data.currentTurn.playerID === this.state.playerID && data.command !== Protocol.SkipTurn)
+
     this.setState({
       gameState: {
         command: data.command,
-        shouldRespond: data.should_respond,
-        currentTurn: data.current_turn,
-        isTurn: data.command === Protocol.Reorg || data.current_turn === this.state.player_id,
+        shouldRespond: data.shouldRespond,
+        currentTurn: data.currentTurn,
+        isTurn,
         hand: data.hand,
         seen: data.seen,
         pile: data.pile,
         opponents: data.opponents,
         moves: data.moves,
-        finished_players: data.finished_players,
+        finishedPlayers: data.finishedPlayers,
         error: data.error,
         message: data.message,
       },
@@ -61,14 +71,14 @@ class App extends Component {
           return
         }
 
-        const { game_id: gameID, player_id: playerID } = this.state
+        const { gameID , playerID } = this.state
 
-        const ws = new WebSocket(`ws://localhost:8000/ws?game_id=${gameID}&player_id=${playerID}`)
+        const ws = new WebSocket(`ws://localhost:8000/ws?gameID=${gameID}&playerID=${playerID}`)
 
         ws.onopen = console.info
 
         ws.onerror = (e: any) => {
-          throw new Error(`websocket error: ${e.error}`)
+          throw new Error(`websocket error: ${e}`)
         };
 
         ws.onmessage = this.handleMessage
@@ -79,21 +89,20 @@ class App extends Component {
 
   startGame = () => {
     this.state.ws && this.state.ws.send(JSON.stringify({
-      player_id: this.state.player_id,
+      playerID: this.state.playerID,
       command: Protocol.Start,
     }))
   }
 
 
   sendReply = (reply: Reply) => {
-    reply.player_id = this.state.player_id;
+    reply.playerID = this.state.playerID;
     this.state.ws && this.state.ws.send(JSON.stringify(reply))
   }
 
   handleMessage = (raw: MessageEvent) => {
-    console.info("incoming")
     const data: Message = JSON.parse(raw.data)
-    console.log(`command ${data.command}`)
+    console.log(`incmoing command ${data.command}`)
 
     switch (data.command) {
       case Protocol.NewJoiner:
@@ -119,6 +128,18 @@ class App extends Component {
         this.updateGameState(data)
         break;
 
+      case Protocol.ReplenishHand:
+        console.log("REPLENISH HAND", data)
+        this.partiallyUpdateGameState({ message: "Choice accepted", hand: data.hand })
+        setTimeout(() => {
+          this.sendReply({ command: Protocol.ReplenishHand, decision: [], playerID: this.state.playerID })
+        }, 2000)
+        break;
+
+      case Protocol.EndOfTurn:
+        console.log("END OF TURN")
+        break;
+
       default:
         console.log("unknown command", data)
     }
@@ -128,23 +149,24 @@ class App extends Component {
     return (
       <div className="App">
         {
-          this.state.game_id && 
+          this.state.gameID && 
             <GameRoom 
-              gameID={this.state.game_id}
-              isAdmin={this.state.is_admin}
+              gameID={this.state.gameID}
+              isAdmin={this.state.isAdmin}
               name={this.state.name}
               players={this.state.players}
-              playerID={this.state.player_id}
+              playerID={this.state.playerID}
               started={this.state.started}
               gameState={this.state.gameState}
 
               initWS={this.initWS}
               startGame={this.startGame}
               sendReply={this.sendReply}
+              partiallyUpdateGameState={this.partiallyUpdateGameState}
             />
         }
         {
-          !this.state.game_id && 
+          !this.state.gameID && 
             <Welcome updateAppState={this.updateAppState} />
         }
       </div>

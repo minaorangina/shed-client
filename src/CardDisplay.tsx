@@ -11,6 +11,7 @@ function CardDisplay(props: CardDisplayProps) {
         const classes = `${isSelected ? `${styles.selected}` : ''}`
         return (
           <SingleCard
+            key={c.canonicalName}
             card={c}
             handleClick={() => props.toggleSelection(props.group, c)}
             classes={classes}

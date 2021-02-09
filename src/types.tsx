@@ -51,16 +51,16 @@ export interface Card {
 }
 
 export interface Opponent {
-  player_id: string,
+  playerID: string,
   name: string,
   seen: Card[],
 }
 
 export interface PendingGame {
-  player_id: string,
+  playerID: string,
   name: string,
-  player_info: PlayerInfo,
-  is_admin: boolean,
+  playerInfo: PlayerInfo,
+  isAdmin: boolean,
 }
 
 
@@ -75,17 +75,17 @@ export interface PlayerInfo {
 
 export interface Message {
   command: Protocol,
-  player_id: string,
+  playerID: string,
   name: string,
   message: string,
-  should_respond: boolean,
+  shouldRespond: boolean,
   hand: Card[],
   seen: Card[],
   pile: Card[],
   opponents: Opponent[]
-  current_turn?: string,
+  currentTurn?: PlayerInfo,
   moves?: number[],
-  finished_players?: string[]
+  finishedPlayers?: string[]
   error?: string,
   joiner?: string,
 }
@@ -93,7 +93,7 @@ export interface Message {
 
 
 export interface Reply {
-  player_id: string,
+  playerID: string,
   command: Protocol,
   decision: number[],
 }

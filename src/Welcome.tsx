@@ -88,7 +88,7 @@ function handleNewGameSubmit(values: any, updateAppState: Function) {
       })
       .then((data: PendingGame) => {
         console.log("pending game", data)
-        updateAppState({...data, players: [data.player_info]})
+        updateAppState({...data, players: [data.playerInfo]})
       })
       .catch(console.error)
 }
@@ -99,7 +99,7 @@ function handleJoinGameSubmit(values: any, updateAppState: Function) {
       headers: new Headers(),
       body: JSON.stringify({
         name: values.joinName,
-        game_id: values.joinCode,
+        gameID: values.joinCode,
       }),
     })
     fetch(req)
@@ -110,7 +110,7 @@ function handleJoinGameSubmit(values: any, updateAppState: Function) {
         return res.json()
       })
       .then((data: PendingGameJoined) => {
-        const players: PlayerInfo[] = [...data.players, data.player_info]
+        const players: PlayerInfo[] = [...data.players, data.playerInfo]
         console.log("playersss", players)
         updateAppState({...data, players})
       })

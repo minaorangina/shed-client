@@ -15,7 +15,12 @@ class GameRoom extends Component<GameRoomProps> {
     return (
       <>
       {
-        this.props.started && <GameTable gameState={this.props.gameState} sendReply={this.props.sendReply} />
+        this.props.started &&
+          <GameTable
+            gameState={this.props.gameState}
+            sendReply={this.props.sendReply}
+            partiallyUpdateGameState={this.props.partiallyUpdateGameState}
+          />
       }
       {
         !this.props.started &&  
@@ -80,6 +85,7 @@ interface GameRoomProps {
   initWS: Function,
   sendReply: Function,
   startGame: Function,
+  partiallyUpdateGameState: Function,
 }
 
 interface WaitingRoomProps {
