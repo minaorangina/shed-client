@@ -3,7 +3,7 @@ export enum Protocol {
   NewJoiner = 1,
   Reorg = 2,
   Start = 3,
-  HasStarted =4,
+  HasStarted = 4,
   Error = 5,
   // combining game-specific and internal protocol messages.
   // will split later if necessary

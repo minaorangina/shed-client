@@ -4,7 +4,19 @@
   border-radius: 5px;
 }
 
+.disabled {
+  border: 1px solid red;
+  cursor: not-allowed;
+  color: red;
+}
+
 .card {
+  padding: 10px;
+  margin: 5px;
+  width: 8em;
+}
+
+.overlay {
   padding: 10px;
   margin: 5px;
   width: 8em;

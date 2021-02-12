@@ -54,10 +54,10 @@ class GameTable extends Component<GameTableProps>{
       case Protocol.Reorg:
 
         const reorgSet: {[key: number]: Card} = {}
-        props.gameState.hand.forEach((c: Card, i) => {
+        gameState.hand.forEach((c: Card, i) => {
           reorgSet[i] = c;
         })
-         props.gameState.seen.forEach((c: Card, i) => {
+         gameState.seen.forEach((c: Card, i) => {
           reorgSet[i + REORG_SEEN_OFFSET] = c;
         })
 
@@ -70,12 +70,13 @@ class GameTable extends Component<GameTableProps>{
         }
       
       case Protocol.PlayHand:
+        // get max
         return {
           selectableHand: gameState.moves,
           selectableSeen: [],
           selected: [],
           min: 1,
-          max: 1, // this could be more than 1 if cards have the same value.
+          max: gameState.hand.length, // this could be more than 1 if cards have the same value.
         }
 
       default:
@@ -85,34 +86,55 @@ class GameTable extends Component<GameTableProps>{
 
   toggleSelection = (type: string, selection: Card) => {
     console.log("clicked", selection)
-    let newSelected;
-    const idx = this.state.selected.indexOf(selection)
 
-    if (idx === -1) {
-      const maxCardsSelected = this.state.selected.length === this.state.max;
-      if (maxCardsSelected) {
-        console.log("oh no")
-        return;
-      }
-      newSelected = [...this.state.selected, selection].sort()
-    } else {
-      newSelected = this.state.selected.filter(v => v !== selection);
+    const idx = this.state.selected.indexOf(selection)
+    // deselecting a card
+    if (idx > -1) {
+      this.setState({
+        selected: this.state.selected.filter(v => v !== selection),
+      }, () => {
+        console.log("after selection of card", this.state)
+      })
+      return
     }
 
-    console.log("new", newSelected)
+    // selecting a card
+    if (this.state.selected.length === 0) {
+      this.setState({
+        selected: [selection],
+      })
+      return;
+    }
 
-    this.setState({
-      selected: newSelected,
-    }, () => {
-      console.log("after selection of card", this.state)
+    if (this.props.gameState.command === Protocol.Reorg) {
+      if (this.state.selected.length < this.state.max) {
+        this.setState({
+          selected: [...this.state.selected, selection].sort(),
+        })
+      }
+    }
+
+    // Can only select more than one card if they are of the same rank
+    const isSameRank = this.state.selected.every((c: Card) => {
+      return c.rank === selection.rank
     })
+
+    if (isSameRank) {
+      this.setState({
+        selected: [...this.state.selected, selection],
+      })
+      return
+    }
+
+    // tried to add an illegal card
+    console.log("oh no")
   }
 
   handleSubmit = () => {
     const { gameState } = this.props;
     let decision: number[] = []
 
-    if (this.state.selected.length < this.state.min || this.state.selected.length > this.state.min) {
+    if (this.state.selected.length < this.state.min || this.state.selected.length > this.state.max) {
       return
     }
 
@@ -234,7 +256,7 @@ class GameTable extends Component<GameTableProps>{
                     gameState.opponents.map((o: Opponent) => {
                       return (
                         <div className={styles.opponent} key={o.playerID}>
-                          <p>{`${o.playerID}'s visible cards`}</p>
+                          <p>{`${o.name}'s visible cards`}</p>
                           {
                             o.seen.map((c: Card) => (
                               <SingleCard

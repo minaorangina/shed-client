@@ -8,12 +8,17 @@ function CardDisplay(props: CardDisplayProps) {
     {
       props.cards && props.cards.map((c: Card, i) => {
         const isSelected = props.selected.includes(c);
-        const classes = `${isSelected ? `${styles.selected}` : ''}`
+        const isSelectable = props.selectable.includes(i);
+        const classes = `${isSelected ? `${styles.selected}` : ''} ${!isSelectable ? `${styles.disabled}` : ''}`
         return (
           <SingleCard
             key={c.canonicalName}
             card={c}
-            handleClick={() => props.toggleSelection(props.group, c)}
+            handleClick={() => {
+              if (isSelectable) {
+                props.toggleSelection(props.group, c)
+              }
+            }}
             classes={classes}
           />
         )

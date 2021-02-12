@@ -1,9 +1,10 @@
-import deck from './deck'
 import { Card } from './types'
 import styles from './Pile.module.css'
+import { SingleCard } from './CardDisplay'
 
 function Pile(props: PileProps) {
   const { cards } = props
+  const topCard = cards[0]
   return (
     <div className={styles.container}>
       <h2>Pile</h2>
@@ -12,11 +13,9 @@ function Pile(props: PileProps) {
           <p>Pile is empty!</p> :
           <div className={styles.wrapper}>
             {
-              <img
-                className={styles.topCard}
-                key={cards[0].canonicalName}
-                alt={cards[0].canonicalName}
-                src={deck[cards[0].suit][cards[0].rank]}
+              <SingleCard
+                classes={styles.topCard}
+                card={topCard}
               />
             }
             <div className={styles.list}>

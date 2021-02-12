@@ -44,7 +44,7 @@ class App extends Component {
   updateGameState = (data: Message) => {
     // console.log("update", data)
     const isTurn = data.command === Protocol.Reorg ||
-      (data.currentTurn && data.currentTurn.playerID === this.state.playerID && data.command !== Protocol.SkipTurn)
+      (data.currentTurn && data.currentTurn.playerID === this.state.playerID)
 
     this.setState({
       gameState: {
@@ -131,13 +131,30 @@ class App extends Component {
       case Protocol.ReplenishHand:
         console.log("REPLENISH HAND", data)
         this.partiallyUpdateGameState({ message: "Choice accepted", hand: data.hand })
+        // send ack
         setTimeout(() => {
           this.sendReply({ command: Protocol.ReplenishHand, decision: [], playerID: this.state.playerID })
-        }, 2000)
+        }, 1500)
         break;
 
       case Protocol.EndOfTurn:
         console.log("END OF TURN")
+        break;
+
+      case Protocol.SkipTurn:
+        console.log("SKIP TURN", data)
+        this.updateGameState(data)
+        if (this.state.gameState.isTurn) {
+          // send ack
+          setTimeout(() => {
+            this.sendReply({ command: Protocol.SkipTurn, decision: [], playerID: this.state.playerID })
+          }, 1500)
+        }
+        break;
+
+      case Protocol.Burn:
+        console.log("BURN!")
+        this.updateGameState(data)
         break;
 
       default:
