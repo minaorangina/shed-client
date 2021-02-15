@@ -21,6 +21,33 @@ export enum Protocol {
   GameOver = 17,
 }
 
+const protocols: string[] = [
+  "Null",
+  "NewJoiner",
+  "Reorg",
+  "Start",
+  "HasStarted",
+  "Error",
+  // combining game-specific and internal protocol messages.
+  // will split later if necessary
+  "PlayHand",
+  "PlaySeen",
+  "PlayUnseen",
+  "ReplenishHand",
+  "Turn",
+  "EndOfTurn",
+  "SkipTurn",
+  "Burn",
+  "UnseenSuccess",
+  "UnseenFailure",
+  "PlayerFinished",
+  "GameOver",
+]
+
+export function protocolToString(cmd: Protocol): string {
+  return protocols[cmd]
+}
+
 export enum Rank {
   Ace = "Ace",
   Two = "Two",

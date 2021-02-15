@@ -2,7 +2,9 @@ import { Component } from 'react'
 import './App.css';
 import Welcome from './Welcome';
 import GameRoom from './GameRoom';
-import { GameState, Message, Protocol, Reply, PlayerInfo } from './types';
+import { GameState, Message, Protocol, Reply, PlayerInfo, protocolToString } from './types';
+
+const ACK_TIMEOUT = 1500
 
 type AppState = {
   gameID: string,
@@ -95,6 +97,15 @@ class App extends Component {
     }))
   }
 
+  sendAck = () => {
+    const reply: Reply = {
+      command: this.state.gameState.command,
+      playerID: this.state.playerID,
+      decision: [],
+    }
+    this.sendReply(reply)
+  }
+
 
   sendReply = (reply: Reply) => {
     reply.playerID = this.state.playerID;
@@ -103,16 +114,16 @@ class App extends Component {
 
   handleMessage = (raw: MessageEvent) => {
     const data: Message = JSON.parse(raw.data)
-    console.log(`incmoing command ${data.command}`)
+    console.info(protocolToString(data.command), data)
 
     switch (data.command) {
       case Protocol.NewJoiner:
-        console.log("NEW JOINER",data)
         this.updateAppState({ players: [...this.state.players, data.joiner] })
         break;
 
       case Protocol.Reorg:
-        console.log("REORG", data)
+      case Protocol.Turn:
+      case Protocol.PlayHand:
         this.updateGameState(data)
         break;
 
@@ -123,39 +134,24 @@ class App extends Component {
         })
         break;
 
-      case Protocol.Turn:
-      case Protocol.PlayHand:
-        console.log("TURN", data)
-        this.updateGameState(data)
-        break;
-
       case Protocol.ReplenishHand:
-        console.log("REPLENISH HAND", data)
-        this.partiallyUpdateGameState({ message: "Choice accepted", hand: data.hand })
+        this.updateGameState({ ...data, message: "Choice accepted" })
         // send ack
         setTimeout(() => {
-          this.sendReply({ command: Protocol.ReplenishHand, decision: [], playerID: this.state.playerID })
-        }, 1500)
+          this.sendAck()
+        }, ACK_TIMEOUT)
         break;
 
       case Protocol.EndOfTurn:
-        console.log("END OF TURN")
-        break;
-
       case Protocol.SkipTurn:
-        console.log("SKIP TURN", data)
+      case Protocol.Burn:
         this.updateGameState(data)
         if (this.state.gameState.isTurn) {
           // send ack
           setTimeout(() => {
-            this.sendReply({ command: Protocol.SkipTurn, decision: [], playerID: this.state.playerID })
-          }, 1500)
+            this.sendAck()
+          }, ACK_TIMEOUT)
         }
-        break;
-
-      case Protocol.Burn:
-        console.log("BURN!")
-        this.updateGameState(data)
         break;
 
       default:
