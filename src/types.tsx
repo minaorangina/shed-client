@@ -83,6 +83,7 @@ export interface Message {
   seen: Card[],
   pile: Card[],
   opponents: Opponent[]
+  deckCount: number,
   currentTurn?: PlayerInfo,
   moves?: number[],
   finishedPlayers?: string[]
@@ -109,6 +110,7 @@ export interface GameState {
   moves: number[],
   opponents: Opponent[]
   message: string,
+  deckCount: number,
 }
 
 export enum CardGroup {

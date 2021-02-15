@@ -60,6 +60,7 @@ class App extends Component {
         finishedPlayers: data.finishedPlayers,
         error: data.error,
         message: data.message,
+        deckCount: data.deckCount,
       },
     })
   }

@@ -201,6 +201,9 @@ class GameTable extends Component<GameTableProps>{
         {
           gameState.message && <h2>{gameState.message}</h2>
         }
+        {
+          gameState.deckCount && <h3>Cards left in deck: {gameState.deckCount}</h3>
+        }
         <div className={styles.container}>
           <div className={styles.personalContainer}>
             {
