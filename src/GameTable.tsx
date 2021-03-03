@@ -2,89 +2,20 @@ import { Component } from 'react'
 import CardDisplay, { SingleCard } from './CardDisplay'
 import Pile from './Pile'
 import styles from './GameTable.module.css'
-import { GameState, Protocol, CardGroup, Card, Reply, Opponent } from './types'
-
-const REORG_SEEN_OFFSET = 3
-
+import { GameTableProps, Protocol, CardGroup, Card, Reply, Opponent, REORG_SEEN_OFFSET } from './types'
 interface GameTableState {
-  selectableHand: number[],
-  selectableSeen: number[],
   selected: Card[],
-  min: number,
-  max: number,
-  reorgSet: {[key: number]: Card},
 }
-
-interface GameTableProps {
-  gameState: GameState,
-  sendReply: Function,
-  partiallyUpdateGameState: Function,
-}
-
 class GameTable extends Component<GameTableProps>{
   constructor(props: GameTableProps) {
     super(props);
   }
 
   state: GameTableState = {
-    selectableHand: [],
-    selectableSeen: [],
     selected: [],
-    min: 0,
-    max: 0,
-    reorgSet: {},
   }
 
-  static getDerivedStateFromProps(props: GameTableProps, state: GameTableState) {
-    const { gameState } = props;
-    if (!gameState.isTurn) {
-      return {
-        selectableHand: [],
-        selectableSeen: [],
-        selected: [],
-        max: 0,
-      }
-    }
-
-    if (state.selected.length > 0) {
-      return null
-    }
-
-    switch(gameState.command) {
-      case Protocol.Reorg:
-
-        const reorgSet: {[key: number]: Card} = {}
-        gameState.hand.forEach((c: Card, i) => {
-          reorgSet[i] = c;
-        })
-         gameState.seen.forEach((c: Card, i) => {
-          reorgSet[i + REORG_SEEN_OFFSET] = c;
-        })
-
-        return {
-          selectableHand: [0,1,2],
-          selectableSeen: [0,1,2],
-          min: 3,
-          max: 3,
-          reorgSet,
-        }
-      
-      case Protocol.PlayHand:
-        // get max
-        return {
-          selectableHand: gameState.moves,
-          selectableSeen: [],
-          selected: [],
-          min: 1,
-          max: gameState.hand.length, // this could be more than 1 if cards have the same value.
-        }
-
-      default:
-        return null
-    }
-  }
-
-  toggleSelection = (type: string, selection: Card) => {
+  toggleSelection = (type: CardGroup, selection: Card) => {
     console.log("clicked", selection)
 
     const idx = this.state.selected.indexOf(selection)
@@ -106,11 +37,12 @@ class GameTable extends Component<GameTableProps>{
       return;
     }
 
-    if (this.props.gameState.command === Protocol.Reorg) {
-      if (this.state.selected.length < this.state.max) {
+    if (this.props.command === Protocol.Reorg) {
+      if (this.state.selected.length < this.props.max) {
         this.setState({
           selected: [...this.state.selected, selection].sort(),
         })
+        return
       }
     }
 
@@ -131,23 +63,22 @@ class GameTable extends Component<GameTableProps>{
   }
 
   handleSubmit = () => {
-    const { gameState } = this.props;
     let decision: number[] = []
 
-    if (this.state.selected.length < this.state.min || this.state.selected.length > this.state.max) {
+    if (this.state.selected.length < this.props.min || this.state.selected.length > this.props.max) {
       return
     }
 
-    if (gameState.command === Protocol.Reorg) {
+    if (this.props.command === Protocol.Reorg) {
       let hand = [...this.state.selected]
       let seen: Card[] = []
 
       // map cards to server index
       decision = this.state.selected.map((card: Card): number => {
-        let idx = gameState.hand.indexOf(card);
+        let idx = this.props.hand.indexOf(card);
 
         if (idx === -1) {
-          const seenIdx = gameState.seen.indexOf(card)
+          const seenIdx = this.props.seen.indexOf(card)
           idx = seenIdx + REORG_SEEN_OFFSET;
         }
 
@@ -157,7 +88,7 @@ class GameTable extends Component<GameTableProps>{
       // grab the leftover cards, maintaining their ordering
       for (let i = 0; i < 6; i++) {
         if (!decision.includes(i)) {
-          seen.push(this.state.reorgSet[i])
+          seen.push(this.props.reorgSet[i])
         }
       }
 
@@ -168,21 +99,51 @@ class GameTable extends Component<GameTableProps>{
 
       const reply: Reply = {
         playerID: "", // handled in App
-        command: gameState.command,
+        command: this.props.command,
         decision: decision.sort(),
       }
 
       this.props.sendReply(reply);
     }
 
-    if (gameState.command === Protocol.PlayHand) {
+    if (this.props.command === Protocol.PlayHand) {
       const decision = this.state.selected.map((card: Card) => {
-        return gameState.hand.indexOf(card)
+        return this.props.hand.indexOf(card)
       })
 
       const reply: Reply = {
         playerID: "", // handled in App
-        command: gameState.command,
+        command: this.props.command,
+        decision,
+      }
+
+      this.props.sendReply(reply);
+      this.setState({ selected: [] })
+    }
+
+    if (this.props.command === Protocol.PlaySeen) {
+      const decision = this.state.selected.map((card: Card) => {
+        return this.props.seen.indexOf(card)
+      })
+
+      const reply: Reply = {
+        playerID: "", // handled in App
+        command: this.props.command,
+        decision,
+      }
+
+      this.props.sendReply(reply);
+      this.setState({ selected: [] })
+    }
+
+    if (this.props.command === Protocol.PlayUnseen) {
+      const decision = this.state.selected.map((card: Card) => {
+        return this.props.unseen.indexOf(card)
+      })
+
+      const reply: Reply = {
+        playerID: "", // handled in App
+        command: this.props.command,
         decision,
       }
 
@@ -192,71 +153,86 @@ class GameTable extends Component<GameTableProps>{
   }
 
   render() {
-    const { gameState } = this.props
+    const {
+      message,
+      deckCount,
+      command,
+      isTurn,
+      min,
+      max,
+      hand,
+      selectableHand,
+      seen,
+      selectableSeen,
+      unseen,
+      selectableUnseen,
+      pile,
+      opponents,
+    } = this.props
+
     return (
       <>
-        {
-          !gameState && <p>Waiting for server...</p>
-        }
-        {
-          gameState.message && <h2>{gameState.message}</h2>
-        }
-        {
-          gameState.deckCount && <h3>Cards left in deck: {gameState.deckCount}</h3>
-        }
+        <h2>{message}</h2>
+        <h3>Cards left in deck: {deckCount}</h3>
+
         <div className={styles.container}>
           <div className={styles.personalContainer}>
             {
-              gameState.isTurn &&
-              gameState.command !== Protocol.SkipTurn &&
+              isTurn &&
+              command !== Protocol.SkipTurn &&
               <button
-                disabled={this.state.selected.length < this.state.min}
+                disabled={this.state.selected.length < min}
                 onClick={this.handleSubmit}>
                   Confirm
               </button>
             }
             {
-              gameState.hand && (
-                <>
-                  <h2>Hand cards</h2>
-                  <CardDisplay
-                    cards={gameState.hand}
-                    selectable={this.state.selectableHand}
-                    selected={this.state.selected}
-                    toggleSelection={this.toggleSelection}
-                    group={CardGroup.hand}
-                  />
-                </>
-              )
+              <>
+                <h2>Hand cards</h2>
+                <CardDisplay
+                  cards={hand}
+                  selectable={selectableHand}
+                  selected={this.state.selected}
+                  toggleSelection={this.toggleSelection}
+                  group={CardGroup.hand}
+                />
+              </>
             }
             {
-              gameState.seen && (
-                <>
-                  <h2>Visible cards</h2>
-                  <CardDisplay
-                    cards={gameState.seen}
-                    selectable={this.state.selectableSeen}
-                    selected={this.state.selected}
-                    toggleSelection={this.toggleSelection}
-                    group={CardGroup.seen}
-                  />
-                </>
-              )
+              <>
+                <h2>Visible cards</h2>
+                <CardDisplay
+                  cards={seen}
+                  selectable={selectableSeen}
+                  selected={this.state.selected}
+                  toggleSelection={this.toggleSelection}
+                  group={CardGroup.seen}
+                />
+              </>
             }
             {
+              <>
               <h2>Hidden cards</h2>
+                <CardDisplay
+                  cards={unseen}
+                  selectable={selectableUnseen}
+                  selected={this.state.selected}
+                  toggleSelection={this.toggleSelection}
+                  group={CardGroup.unseen}
+                />
+              </>
             }
             </div>
             <div className={styles.sharedContainer}>
             {
-              gameState.pile && <Pile cards={gameState.pile} />
+              pile && <Pile cards={pile} />
             }
             {
-              gameState.opponents && (
+              opponents && (
                 <div className={styles.opponentsContainer}>
                   <h4>Opponents</h4>
                   {
-                    gameState.opponents.map((o: Opponent) => {
+                    opponents.map((o: Opponent) => {
                       return (
                         <div className={styles.opponent} key={o.playerID}>
                           <p>{`${o.name}'s visible cards`}</p>
@@ -277,9 +253,9 @@ class GameTable extends Component<GameTableProps>{
                 </div>
               )
             }
-            </div>
+          </div>
         </div>
-     </>
+      </>
     )
   }
 }

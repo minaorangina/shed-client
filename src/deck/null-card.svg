@@ -1,0 +1,12 @@
+<svg width="167" height="242" xmlns="http://www.w3.org/2000/svg">
+ <!-- Created with Method Draw - http://github.com/duopixel/Method-Draw/ -->
+  <defs>
+    <style type="text/css"><![CDATA[
+       #MyRect {
+         stroke: black;
+         fill: red;
+       }
+    ]]></style>
+  </defs>
+  <rect x="10" height="242" y="10" width="167" id="MyRect"/>
+</svg>

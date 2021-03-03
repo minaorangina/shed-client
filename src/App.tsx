@@ -56,6 +56,7 @@ class App extends Component {
         isTurn,
         hand: data.hand,
         seen: data.seen,
+        unseen: data.unseen,
         pile: data.pile.reverse(),
         opponents: data.opponents,
         moves: data.moves,
@@ -124,6 +125,10 @@ class App extends Component {
       case Protocol.Reorg:
       case Protocol.Turn:
       case Protocol.PlayHand:
+        this.updateGameState(data)
+        break;
+
+      case Protocol.PlaySeen:
         this.updateGameState(data)
         break;
 

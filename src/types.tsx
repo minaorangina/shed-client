@@ -48,7 +48,18 @@ export function protocolToString(cmd: Protocol): string {
   return protocols[cmd]
 }
 
+export const REORG_SEEN_OFFSET = 3
+
+export interface Deck {
+  NullSuit: any,
+  Clubs: any,
+  Diamonds: any,
+  Hearts: any,
+  Spades: any,
+}
+
 export enum Rank {
+  NullRank = "NullRank",
   Ace = "Ace",
   Two = "Two",
   Three = "Three",
@@ -65,6 +76,7 @@ export enum Rank {
 }
 
 export enum Suit {
+  NullSuit = "NullSuit",
   Clubs = "Clubs",
   Diamonds = "Diamonds",
   Hearts = "Hearts",
@@ -108,6 +120,7 @@ export interface Message {
   shouldRespond: boolean,
   hand: Card[],
   seen: Card[],
+  unseen: Card[],
   pile: Card[],
   opponents: Opponent[]
   deckCount: number,
@@ -131,6 +144,7 @@ export interface GameState {
   shouldRespond: boolean,
   hand: Card[],
   seen: Card[],
+  unseen: Card[],
   pile: Card[],
   currentTurn: string,
   isTurn: boolean,
@@ -144,4 +158,26 @@ export enum CardGroup {
   hand = "hand",
   seen = "seen",
   unseen = "unseen",
+}
+
+export interface GameTableProps {
+  command: Protocol,
+  isTurn: Boolean,
+  hand: Card[],
+  seen: Card[],
+  unseen: Card[],
+  pile: Card[],
+  deckCount: number,
+  opponents: Opponent[],
+  message: string,
+  selectableHand: number[],
+  selectableSeen: number[],
+  selectableUnseen: number[],
+  selected: Card[],
+  selectedUnseen: number[],
+  min: number,
+  max: number,
+  reorgSet: {[key: number]: Card},
+  sendReply: Function,
+  partiallyUpdateGameState: Function,
 }

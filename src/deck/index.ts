@@ -1,3 +1,4 @@
+import { Deck } from '../types'
 
 import aceOfClubs from './ace_of_clubs.svg'
 import twoOfClubs from './2_of_clubs.svg'
@@ -55,14 +56,13 @@ import jackOfSpades from './jack_of_spades.svg'
 import queenOfSpades from './queen_of_spades.svg'
 import kingOfSpades from './king_of_hearts.svg'
 
-interface Deck {
-  Clubs: any,
-  Diamonds: any,
-  Hearts: any,
-  Spades: any,
-}
+import nullCard from './null-card.svg'
+
 
 const deck: Deck = {
+  NullSuit: {
+    NullRank: nullCard,
+  },
   Clubs: {
     Ace: aceOfClubs,
     Two: twoOfClubs,

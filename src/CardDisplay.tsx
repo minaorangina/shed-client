@@ -31,13 +31,15 @@ function CardDisplay(props: CardDisplayProps) {
 export function SingleCard(props: SingleCardProps) {
   const { card, classes = "", handleClick } = props
   const fn = handleClick ? handleClick : (()=>{})
+  const CardSvg = deck[card.suit][card.rank]
+
   return (
-     <img
-        src={deck[card.suit][card.rank]}
-        alt={card.canonicalName}
-        onClick={() => fn()}
-        className={`${styles.card} ${classes}`}
-      />
+    <img
+      src={deck[card.suit][card.rank]}
+      alt={card.canonicalName}
+      onClick={() => fn()}
+      className={`${styles.card} ${classes}`}
+    />
   )
 }
 
